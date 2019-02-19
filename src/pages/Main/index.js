@@ -5,6 +5,7 @@ import './styles.css'
 
 // Components
 import Header from '../../components/Header'
+import MySnackbarContentWrapper from '../../components/Snackbar'
 
 // Material
 import Table from '@material-ui/core/Table'
@@ -20,7 +21,6 @@ import DialogActions from '@material-ui/core/DialogActions'
 import DialogContent from '@material-ui/core/DialogContent'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import Snackbar from '@material-ui/core/Snackbar'
-import SnackbarContent from '@material-ui/core/SnackbarContent'
 
 // API
 import api from '../../services/api'
@@ -29,6 +29,7 @@ export default class Main extends Component {
   state = {
     customers: [],
     errors: {},
+    successMsg: '',
     customer: {
       FirstName: '',
       LastName: '',
@@ -36,7 +37,8 @@ export default class Main extends Component {
       Email: '',
       Phone: ''
     },
-    open: false
+    open: false,
+    openSnack: false
   }
 
   async componentDidMount() {
@@ -56,6 +58,18 @@ export default class Main extends Component {
     this.setState({
       open: false
     })
+  }
+
+  // SNACKBAR FUNCTIONS
+  handleCloseSnack = (event, reason) => {
+    if (reason === 'clickaway') {
+      return
+    }
+
+    this.setState({ openSnack: false })
+  }
+  handleClick = () => {
+    this.setState({ openSnack: true })
   }
 
   // TWO-WAY DATABIND
@@ -119,7 +133,18 @@ export default class Main extends Component {
   }
   clearError = () => {
     this.setState({
-      errors: {}
+      errors: {
+        firstNameError: false,
+        firstNameErrorMsg: '',
+        lastNameError: false,
+        lastNameErrorMsg: '',
+        documentError: false,
+        documentErrorMsg: '',
+        emailError: false,
+        emailErrorMsg: '',
+        phoneError: false,
+        phoneErrorMsg: ''
+      }
     })
   }
   save = async () => {
@@ -127,10 +152,12 @@ export default class Main extends Component {
       var response = await api.post('/v1/customers', this.state.customer)
 
       this.setState({
-        customers: [...this.state.customers, response.data.data]
+        customers: [...this.state.customers, response.data.data],
+        successMsg: response.data.message
       })
 
       this.handleClose()
+      this.handleClick()
     } catch (error) {
       this.clearError()
       this.validate(error.response.data.data)
@@ -193,6 +220,22 @@ export default class Main extends Component {
     return (
       <div className='container'>
         <Header title='Customers' />
+
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'right'
+          }}
+          open={this.state.openSnack}
+          autoHideDuration={6000}
+          onClose={this.handleCloseSnack}
+        >
+          <MySnackbarContentWrapper
+            onClose={this.handleCloseSnack}
+            variant='success'
+            message={this.state.successMsg}
+          />
+        </Snackbar>
 
         <div className='ajusteTopo'>
           <Paper>
