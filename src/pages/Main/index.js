@@ -19,6 +19,8 @@ import Dialog from '@material-ui/core/Dialog'
 import DialogActions from '@material-ui/core/DialogActions'
 import DialogContent from '@material-ui/core/DialogContent'
 import DialogTitle from '@material-ui/core/DialogTitle'
+import Snackbar from '@material-ui/core/Snackbar'
+import SnackbarContent from '@material-ui/core/SnackbarContent'
 
 // API
 import api from '../../services/api'
@@ -117,18 +119,7 @@ export default class Main extends Component {
   }
   clearError = () => {
     this.setState({
-      errors: {
-        firstNameError: false,
-        firstNameErrorMsg: '',
-        lastNameError: false,
-        lastNameErrorMsg: '',
-        documentError: false,
-        documentErrorMsg: '',
-        emailError: false,
-        emailErrorMsg: '',
-        phoneError: false,
-        phoneErrorMsg: ''
-      }
+      errors: {}
     })
   }
   save = async () => {
@@ -197,7 +188,6 @@ export default class Main extends Component {
 
     this.setState({ errors: properties })
   }
-
 
   render() {
     return (
