@@ -28,8 +28,6 @@ import api from '../../services/api'
 export default class Main extends Component {
   state = {
     customers: [],
-    errors: {},
-    successMsg: '',
     customer: {
       FirstName: '',
       LastName: '',
@@ -37,6 +35,8 @@ export default class Main extends Component {
       Email: '',
       Phone: ''
     },
+    errors: {},
+    successMsg: '',
     open: false,
     openSnack: false
   }
@@ -73,50 +73,12 @@ export default class Main extends Component {
   }
 
   // TWO-WAY DATABIND
-  handleFirstNameChange = e => {
+  handleChange = event => {
     const { customer } = this.state
-    this.setState({
-      customer: {
-        ...customer,
-        FirstName: e.target.value
-      }
-    })
-  }
-  handleLastNameChange = e => {
-    const { customer } = this.state
-    this.setState({
-      customer: {
-        ...customer,
-        LastName: e.target.value
-      }
-    })
-  }
-  handleDocumentChange = e => {
-    const { customer } = this.state
-    this.setState({
-      customer: {
-        ...customer,
-        Document: e.target.value
-      }
-    })
-  }
-  handleEmailChange = e => {
-    const { customer } = this.state
-    this.setState({
-      customer: {
-        ...customer,
-        Email: e.target.value
-      }
-    })
-  }
-  handlePhoneChange = e => {
-    const { customer } = this.state
-    this.setState({
-      customer: {
-        ...customer,
-        Phone: e.target.value
-      }
-    })
+    const {
+      target: { name, value }
+    } = event
+    this.setState({ customer: { ...customer, [name]: value } })
   }
 
   // FORM ACTIONS
@@ -133,22 +95,12 @@ export default class Main extends Component {
   }
   clearError = () => {
     this.setState({
-      errors: {
-        firstNameError: false,
-        firstNameErrorMsg: '',
-        lastNameError: false,
-        lastNameErrorMsg: '',
-        documentError: false,
-        documentErrorMsg: '',
-        emailError: false,
-        emailErrorMsg: '',
-        phoneError: false,
-        phoneErrorMsg: ''
-      }
+      errors: {}
     })
   }
   save = async () => {
     try {
+      console.log(this.state.customer)
       var response = await api.post('/v1/customers', this.state.customer)
 
       this.setState({
@@ -160,60 +112,14 @@ export default class Main extends Component {
       this.handleClick()
     } catch (error) {
       this.clearError()
-      this.validate(error.response.data.data)
-    }
-  }
+      let errors = {}
 
-  validate = async errors => {
-    let properties = {
-      FirstNameError: false,
-      FirstNameErrorMsg: '',
-      LastNameError: false,
-      LastNameErrorMsg: '',
-      DocumentError: false,
-      DocumentErrorMsg: '',
-      EmailError: false,
-      EmailErrorMsg: '',
-      PhoneError: false,
-      PhoneErrorMsg: ''
-    }
+      error.response.data.data.map(x => {
+        return (errors[x.property] = x.message)
+      })
 
-    if (errors.find(x => x.property === 'FirstName')) {
-      properties.FirstNameError = true
-      properties.FirstNameErrorMsg = errors.find(
-        x => x.property === 'FirstName'
-      ).message
+      this.setState({ errors })
     }
-
-    if (errors.find(x => x.property === 'LastName')) {
-      properties.LastNameError = true
-      properties.LastNameErrorMsg = errors.find(
-        x => x.property === 'LastName'
-      ).message
-    }
-
-    if (errors.find(x => x.property === 'Email')) {
-      properties.EmailError = true
-      properties.EmailErrorMsg = errors.find(
-        x => x.property === 'Email'
-      ).message
-    }
-
-    if (errors.find(x => x.property === 'Document')) {
-      properties.DocumentError = true
-      properties.DocumentErrorMsg = errors.find(
-        x => x.property === 'Document'
-      ).message
-    }
-
-    if (errors.find(x => x.property === 'Phone')) {
-      properties.PhoneError = true
-      properties.PhoneErrorMsg = errors.find(
-        x => x.property === 'Phone'
-      ).message
-    }
-
-    this.setState({ errors: properties })
   }
 
   render() {
@@ -275,32 +181,33 @@ export default class Main extends Component {
                 margin='dense'
                 label='First Name'
                 type='text'
+                name='FirstName'
                 value={this.state.customer.FirstName}
-                onChange={this.handleFirstNameChange}
-                error={this.state.errors.FirstNameError}
-                helperText={this.state.errors.FirstNameErrorMsg}
+                onChange={this.handleChange}
+                error={this.state.errors.hasOwnProperty('FirstName')}
+                helperText={this.state.errors.FirstName}
                 fullWidth
               />
-
               <TextField
                 margin='dense'
                 label='Last Name'
                 type='text'
+                name='LastName'
                 value={this.state.customer.LastName}
-                onChange={this.handleLastNameChange}
-                error={this.state.errors.LastNameError}
-                helperText={this.state.errors.LastNameErrorMsg}
+                onChange={this.handleChange}
+                error={this.state.errors.hasOwnProperty('LastName')}
+                helperText={this.state.errors.LastName}
                 fullWidth
               />
               <TextField
                 margin='dense'
-                name='document'
                 label='CPF'
                 type='text'
+                name='Document'
                 value={this.state.customer.Document}
-                onChange={this.handleDocumentChange}
-                error={this.state.errors.DocumentError}
-                helperText={this.state.errors.DocumentErrorMsg}
+                onChange={this.handleChange}
+                error={this.state.errors.hasOwnProperty('Document')}
+                helperText={this.state.errors.Document}
                 fullWidth
               />
               <TextField
@@ -308,10 +215,11 @@ export default class Main extends Component {
                 id='name'
                 label='Email Address'
                 type='email'
+                name='Email'
                 value={this.state.customer.Email}
-                onChange={this.handleEmailChange}
-                error={this.state.errors.EmailError}
-                helperText={this.state.errors.EmailErrorMsg}
+                onChange={this.handleChange}
+                error={this.state.errors.hasOwnProperty('Email')}
+                helperText={this.state.errors.Email}
                 fullWidth
               />
               <TextField
@@ -319,10 +227,11 @@ export default class Main extends Component {
                 id='name'
                 label='Phone'
                 type='tel'
+                name='Phone'
                 value={this.state.customer.Phone}
-                onChange={this.handlePhoneChange}
-                error={this.state.errors.PhoneError}
-                helperText={this.state.errors.PhoneErrorMsg}
+                onChange={this.handleChange}
+                error={this.state.errors.hasOwnProperty('Phone')}
+                helperText={this.state.errors.Phone}
                 fullWidth
               />
             </DialogContent>
